@@ -1,127 +1,137 @@
-import { arrayRemove, arrayUnion, doc, updateDoc } from "firebase/firestore";
-import { useChatStore } from "../../lib/chatStore";
-import { auth, db } from "../../lib/firebase";
-import { useUserStore } from "../../lib/userStore";
+import React, { useState, useEffect } from "react";
 import "./detail.css";
+import { db, storage, auth } from "../../lib/firebase";
+import { collection, addDoc, getDocs, query, orderBy } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { signOut } from "firebase/auth";
 
-const Detail = () => {
-  const { chatId, user, isCurrentUserBlocked, isReceiverBlocked, changeBlock, resetChat } =
-    useChatStore();
-  const { currentUser } = useUserStore();
+const Detail = ({ currentUser }) => {
+  const [caption, setCaption] = useState("");
+  const [file, setFile] = useState(null);
+  const [feed, setFeed] = useState([]);
+  const [comments, setComments] = useState({});
+  const [commentText, setCommentText] = useState({});
+  const [likes, setLikes] = useState({});
 
-  const handleBlock = async () => {
-    if (!user) return;
+  useEffect(() => {
+    const fetchPosts = async () => {
+      const postsQuery = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+      const querySnapshot = await getDocs(postsQuery);
 
-    const userDocRef = doc(db, "users", currentUser.id);
+      const posts = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setFeed(posts);
+    };
 
-    try {
-      await updateDoc(userDocRef, {
-        blocked: isReceiverBlocked ? arrayRemove(user.id) : arrayUnion(user.id),
-      });
-      changeBlock();
-    } catch (err) {
-      console.log(err);
+    fetchPosts();
+  }, []);
+
+  const handlePost = async () => {
+    if (!file && !caption) return;
+
+    let imageUrl = "";
+
+    if (file) {
+      const storageRef = ref(storage, `posts/${Date.now()}_${file.name}`);
+      await uploadBytes(storageRef, file);
+      imageUrl = await getDownloadURL(storageRef);
     }
+
+    const newPost = {
+      caption,
+      imageUrl,
+      createdBy: currentUser.displayName || "Anonymous",
+      createdAt: Date.now(),
+    };
+
+    await addDoc(collection(db, "posts"), newPost);
+    setCaption("");
+    setFile(null);
+
+    setFeed((prev) => [newPost, ...prev]);
   };
 
   const handleLogout = () => {
-    auth.signOut();
-    resetChat()
+    signOut(auth).then(() => {
+      console.log("User logged out");
+    });
+  };
+
+  const handleComment = (postId) => {
+    if (!commentText[postId]) return;
+
+    const newComment = {
+      text: commentText[postId],
+      createdAt: new Date().toLocaleString(),
+    };
+
+    setComments((prevComments) => ({
+      ...prevComments,
+      [postId]: [...(prevComments[postId] || []), newComment],
+    }));
+
+    setCommentText((prev) => ({ ...prev, [postId]: "" }));
+  };
+
+  const handleLike = (postId) => {
+    setLikes((prevLikes) => ({
+      ...prevLikes,
+      [postId]: !prevLikes[postId],
+    }));
   };
 
   return (
     <div className="detail">
-      <div className="user">
-        <img src={user?.avatar || "./avatar.png"} alt="" />
-        <h2>{user?.username}</h2>
-        <p>Lorem ipsum dolor sit amet.</p>
+      <div className="actions">
+        <button className="logout" onClick={handleLogout}>Log Out</button>
       </div>
-      <div className="info">
-        <div className="option">
-          <div className="title">
-            <span>Chat Settings</span>
-            <img src="./arrowUp.png" alt="" />
-          </div>
-        </div>
-        <div className="option">
-          <div className="title">
-            <span>Chat Settings</span>
-            <img src="./arrowUp.png" alt="" />
-          </div>
-        </div>
-        <div className="option">
-          <div className="title">
-            <span>Privacy & help</span>
-            <img src="./arrowUp.png" alt="" />
-          </div>
-        </div>
-        <div className="option">
-          <div className="title">
-            <span>Shared photos</span>
-            <img src="./arrowDown.png" alt="" />
-          </div>
-          <div className="photos">
-            <div className="photoItem">
-              <div className="photoDetail">
-                <img
-                  src="https://images.pexels.com/photos/7381200/pexels-photo-7381200.jpeg?auto=compress&cs=tinysrgb&w=800&lazy=load"
-                  alt=""
-                />
-                <span>photo_2024_2.png</span>
+
+      <div className="createPost">
+        <textarea
+          placeholder="What's on your mind?"
+          value={caption}
+          onChange={(e) => setCaption(e.target.value)}
+        />
+        <input type="file" onChange={(e) => setFile(e.target.files[0])} />
+        <button onClick={handlePost} disabled={!caption && !file}>Post</button>
+      </div>
+
+      <div className="feed">
+        {feed.map((post) => (
+          <div className="post" key={post.id}>
+            {post.imageUrl && <img src={post.imageUrl} alt="Post" />}
+            <div className="content">
+              <strong>{post.createdBy}</strong>
+              <p>{post.caption}</p>
+              <div className="actions">
+                <button className="like-button" onClick={() => handleLike(post.id)}>
+                  👍 {likes[post.id] ? 'Liked' : 'Like'}
+                </button>
               </div>
-              <img src="./download.png" alt="" className="icon" />
-            </div>
-            <div className="photoItem">
-              <div className="photoDetail">
-                <img
-                  src="https://images.pexels.com/photos/7381200/pexels-photo-7381200.jpeg?auto=compress&cs=tinysrgb&w=800&lazy=load"
-                  alt=""
-                />
-                <span>photo_2024_2.png</span>
+              <div className="comment-section">
+                <div className="comments-list">
+                  {comments[post.id]?.map((comment, index) => (
+                    <div className="comment-item" key={index}>
+                      {comment.text} <span className="timestamp">{comment.createdAt}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="comment-input">
+                  <input
+                    type="text"
+                    value={commentText[post.id] || ""}
+                    onChange={(e) => setCommentText({ ...commentText, [post.id]: e.target.value })}
+                    placeholder="Add a comment..."
+                  />
+                  <button onClick={() => handleComment(post.id)}>Comment</button>
+                </div>
               </div>
-              <img src="./download.png" alt="" className="icon" />
-            </div>
-            <div className="photoItem">
-              <div className="photoDetail">
-                <img
-                  src="https://images.pexels.com/photos/7381200/pexels-photo-7381200.jpeg?auto=compress&cs=tinysrgb&w=800&lazy=load"
-                  alt=""
-                />
-                <span>photo_2024_2.png</span>
-              </div>
-              <img src="./download.png" alt="" className="icon" />
-            </div>
-            <div className="photoItem">
-              <div className="photoDetail">
-                <img
-                  src="https://images.pexels.com/photos/7381200/pexels-photo-7381200.jpeg?auto=compress&cs=tinysrgb&w=800&lazy=load"
-                  alt=""
-                />
-                <span>photo_2024_2.png</span>
-              </div>
-              <img src="./download.png" alt="" className="icon" />
             </div>
           </div>
-        </div>
-        <div className="option">
-          <div className="title">
-            <span>Shared Files</span>
-            <img src="./arrowUp.png" alt="" />
-          </div>
-        </div>
-        <button onClick={handleBlock}>
-          {isCurrentUserBlocked
-            ? "You are Blocked!"
-            : isReceiverBlocked
-            ? "User blocked"
-            : "Block User"}
-        </button>
-        <button className="logout" onClick={() => auth.signOut()}>
-          Logout
-        </button>
+        ))}
       </div>
     </div>
   );
 };
 
 export default Detail;
+

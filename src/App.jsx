@@ -31,7 +31,10 @@ const App = () => {
         <>
           <List />
           {chatId && <Chat />}
-          {chatId && <Detail />}
+          {chatId && <Detail currentUser={currentUser} />} {/* Pass currentUser here */}
+          {/* Add Post Creation and Feed Components */}
+          {/*<CreatePost currentUser={currentUser} />
+          <Feed />*/}
         </>
       ) : (
         <Login />
