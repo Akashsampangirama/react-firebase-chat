@@ -1,0 +1,58 @@
+.onlineUsers {
+    padding: 15px; /* Increased padding for a better layout */
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-top: 10px;
+    background-color: #f9f9f9;
+    max-height: 300px; /* Set a maximum height */
+    overflow-y: auto; /* Enable vertical scrolling */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Added shadow for depth */
+}
+
+.title {
+    font-size: 18px; /* Increased font size for better visibility */
+    font-weight: bold;
+    margin-bottom: 12px; /* Increased margin for spacing */
+    color: #070202; /* Darker text for better contrast */
+}
+
+.user {
+    display: flex;
+    align-items: center;
+    padding: 8px; /* Increased padding for a more comfortable click area */
+    border-radius: 6px; /* Slightly larger border-radius for a smoother look */
+    transition: background-color 0.3s, transform 0.2s; /* Added transform for hover effect */
+}
+
+.user:hover {
+    background-color: #e0e0e0;
+    transform: scale(1.02); /* Slightly enlarge on hover */
+}
+
+.user img {
+    width: 35px; /* Slightly larger avatar */
+    height: 35px; /* Keep it proportional */
+    border-radius: 50%; /* Circular avatar */
+    margin-right: 12px; /* More spacing between image and text */
+}
+
+.username {
+    font-weight: 600; /* Increased font weight for emphasis */
+    color: #555; /* Slightly darker text color */
+}
+
+.header {
+    font-size: 20px; /* Size of the header */
+    font-weight: bold; /* Bold text for emphasis */
+    color: #333; /* Dark color for better contrast */
+    margin: 10px 0; /* Space above and below the header */
+    text-align: center; /* Center the header text */
+    text-transform: uppercase; /* Uppercase for a stronger look */
+    letter-spacing: 1px; /* Slightly increased spacing between letters */
+}
+
+.h2 {
+    font-size: 18px;
+    color: #0b0303;
+    margin-bottom: 15px;
+  }

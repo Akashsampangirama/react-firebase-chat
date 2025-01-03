@@ -1,7 +1,7 @@
 import { useEffect } from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Chat from "./components/chat/Chat";
 import Detail from "./components/detail/Detail";
-import List from "./components/list/List";
 import Login from "./components/login/Login";
 import Notification from "./components/notification/Notification";
 import { onAuthStateChanged } from "firebase/auth";
@@ -15,6 +15,7 @@ const App = () => {
 
   useEffect(() => {
     const unSub = onAuthStateChanged(auth, (user) => {
+      console.log("User authentication state changed:", user);
       fetchUserInfo(user?.uid);
     });
 
@@ -23,24 +24,24 @@ const App = () => {
     };
   }, [fetchUserInfo]);
 
-  if (isLoading) return <div className="loading">Loading...</div>;
+  if (isLoading) {
+    return <div className="loading">Loading...</div>;
+  }
 
   return (
-    <div className="container">
-      {currentUser ? (
-        <>
-          <List />
-          {chatId && <Chat />}
-          {chatId && <Detail currentUser={currentUser} />} {/* Pass currentUser here */}
-          {/* Add Post Creation and Feed Components */}
-          {/*<CreatePost currentUser={currentUser} />
-          <Feed />*/}
-        </>
-      ) : (
-        <Login />
-      )}
-      <Notification />
-    </div>
+    <Router>
+      <Routes>
+        {/* Route for login page */}
+        <Route path="/" element={currentUser ? <Detail currentUser={currentUser} /> : <Login />} />
+        
+        {/* Route for /detail page */}
+        <Route path="/detail" element={currentUser ? <Detail currentUser={currentUser} /> : <Login />} />
+        
+        {/* Other routes */}
+        <Route path="/chat" element={chatId ? <Chat /> : <Login />} />
+        <Route path="/notification" element={<Notification />} />
+      </Routes>
+    </Router>
   );
 };
 

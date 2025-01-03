@@ -1,173 +1,332 @@
-.detail {
-  margin: 20px auto;
-  max-width: 800px;
-  padding: 20px;
-  border-radius: 10px;
-  background-color: #f9f9f9;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  color: black; /* Set all text color to black */
-  overflow-y: auto; /* Enable scrolling for the entire detail section */
-  max-height: 90vh; /* Set max height for scrolling */
+/* General Styles */
+html, body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f0f2f5;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
 }
 
+#root {
+  height: 100%;
+  display: flex;
+}
+
+/* Detail Component */
+.detail {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+  gap: 20px;
+  box-sizing: border-box;
+}
+
+/* Sidebar Section */
+.sidebar {
+  width: 250px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.sidebar h2 {
+  font-size: 18px;
+  color: #0b0303;
+  margin-bottom: 15px;
+}
+
+.sidebar ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.sidebar li {
+  padding: 10px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.sidebar li:last-child {
+  border-bottom: none;
+}
+
+.sidebar li:hover {
+  background-color: #f0f8ff;
+  cursor: pointer;
+}
+
+/* Main Content Section */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); /* Increased shadow for depth */
+  padding: 20px;
+  padding-bottom: 30px; /* Additional space for footer or bottom content */
+  overflow-y: auto;
+  box-sizing: border-box;
+  position: relative; /* For positioning any absolute children */
+  transition: background-color 0.3s ease; /* Smooth background transition */
+}
+
+/* Optional: Add hover effect for the main content */
+.main-content:hover {
+  background-color: #f9f9f9; /* Slight change on hover for interaction feedback */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 15px; /* Adjust padding for smaller screens */
+  }
+}
+
+/* Logout Button */
 .actions {
   display: flex;
   justify-content: flex-end;
   margin-bottom: 20px;
 }
 
-.actions button {
-  padding: 10px 15px;
+.logout {
+  background-color: #f44336;
+  color: #fff;
   border: none;
-  border-radius: 5px;
+  padding: 8px 12px;
+  font-size: 12px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: bold;
-  background-color: #ff6b6b;
-  color: white;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.3s ease;
 }
 
-.actions button:hover {
-  background-color: #e65c5c;
+.logout:hover {
+  background-color: #d32f2f;
 }
 
+/* Create Post Section */
 .createPost {
   margin-bottom: 20px;
   padding: 15px;
-  background-color: white;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .createPost textarea {
-  padding: 10px;
   width: 100%;
-  height: 100px;
-  resize: none;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+  padding: 10px;
   font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  resize: vertical;
+  height: 100px;
 }
 
-.createPost input[type="file"] {
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 14px;
+.createPost .upload-btn {
+  display: inline-block;
+  background-color: #007bff;
+  color: white;
+  padding: 8px 10px;
+  margin-top: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  text-align: center;
+}
+
+.createPost .upload-btn:hover {
+  background-color: #0056b3;
 }
 
 .createPost button {
-  padding: 10px 15px;
-  background-color: #5183fe;
+  background-color: #4caf50;
   color: white;
-  font-size: 16px;
-  font-weight: bold;
   border: none;
-  border-radius: 5px;
+  padding: 8px 12px;
+  font-size: 12px;
+  margin-top: 10px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
 }
 
-.createPost button:disabled {
-  background-color: #a5c1ff;
-  cursor: not-allowed;
+.createPost button:hover {
+  background-color: #45a049;
 }
 
-.createPost button:hover:enabled {
-  background-color: #416edc;
+/* Image Preview */
+.image-preview {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px; /* Space between images */
 }
 
+.preview-img {
+  max-width: 100px; /* Adjust the size */
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Feed Section */
 .feed {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.posts-container {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
+/* Post Styles */
 .post {
+  background-color: #ffffff;
+  border-radius: 12px;
   padding: 15px;
-  background-color: white;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.post:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.post-images {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
-.feed .post img {
-  max-width: 100%;
-  border-radius: 10px;
-  object-fit: cover;
+.post-image {
+  max-width: 100px; /* Adjust the size for post images */
+  border-radius: 8px;
+  cursor: pointer;
 }
 
-.content {
+.post .content {
   display: flex;
   flex-direction: column;
+}
+
+.post strong {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.post p {
+  font-size: 14px;
+  color: #444;
+  line-height: 1.5;
+}
+
+/* Post Actions */
+.actions button {
+  margin-right: 10px;
+}
+
+.like-button, .dislike-button {
+  background-color: transparent;
+  color: #555;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  display: inline-flex;
+  align-items: center;
   gap: 5px;
 }
 
-.actions .like-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: black;
-  font-size: 16px;
-  display: inline-flex;
-  align-items: center;
+.like-button:hover, .dislike-button:hover {
+  background-color: #e0e0e0;
+  color: #000;
 }
 
+/* Comment Section */
 .comment-section {
-  margin-top: 10px;
+  margin-top: 15px;
 }
 
 .comments-list {
-  max-height: 150px; /* Set max height for comments list */
-  overflow-y: auto; /* Enable scrolling for comments */
-  border-top: 1px solid #ddd;
-  margin-top: 10px;
-  padding-top: 10px;
-  padding-bottom: 10px; /* Add bottom padding for aesthetics */
+  margin-bottom: 10px;
+  max-height: 150px;
+  overflow-y: auto;
 }
 
 .comment-item {
-  font-size: 14px;
-  color: black; /* Ensure comment text is black */
-  margin-bottom: 5px; /* Spacing between comments */
-}
-
-.timestamp {
-  font-size: 12px;
-  color: gray;
-  margin-left: 10px;
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  padding: 8px;
+  margin-bottom: 5px;
 }
 
 .comment-input {
   display: flex;
-  gap: 5px;
-  margin-top: 10px; /* Spacing above the input box */
+  gap: 10px;
+  align-items: center;
 }
 
 .comment-input input {
-  width: calc(100% - 90px);
+  flex: 3; /* Wider input box */
   padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
 }
 
 .comment-input button {
-  padding: 8px;
-  background-color: #5183fe;
-  color: white;
+  flex: 1; /* Smaller button */
+  padding: 6px 10px;
+  font-size: 12px;
+  background-color: #4caf50;
+  color: #fff;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
+  text-align: center;
   cursor: pointer;
-  transition: background-color 0.2s ease;
 }
 
 .comment-input button:hover {
-  background-color: #416edc;
+  background-color: #45a049;
 }
 
+/* Modal Styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  max-width: 90%;
+  max-height: 90%;
+}
+
+.modal-image {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 8px;
+}
+
+/* Additional Styles */
+.timestamp {
+  font-size: 12px;
+  color: #aaa;
+}

@@ -1,0 +1,82 @@
+/* chatList.css */
+
+.chatList {
+    width: 100%;
+    max-height: 400px; /* Adjust as needed */
+    overflow-y: auto;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    box-sizing: border-box;
+  }
+  
+  .search {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .searchBar {
+    flex: 1;
+    position: relative;
+  }
+  
+  .searchBar input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+  
+  .searchBar img {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    pointer-events: none; /* Prevent clicks on the icon */
+  }
+  
+  .add {
+    margin-left: 10px;
+    cursor: pointer;
+  }
+  
+  .item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-radius: 6px;
+    margin: 5px 0;
+    transition: background-color 0.3s;
+  }
+  
+  .item:hover {
+    background-color: #f0f0f0; /* Light gray on hover */
+  }
+  
+  .item img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%; /* Circular avatar */
+    margin-right: 10px;
+  }
+  
+  .texts {
+    flex: 1;
+  }
+  
+  .texts span {
+    font-weight: bold;
+    display: block; /* Make username a block element */
+  }
+  
+  .texts p {
+    color: #555; /* Subtle color for the last message */
+    margin: 0; /* Remove default margin */
+    font-size: 14px; /* Slightly smaller font size */
+  }
+  
