@@ -25,7 +25,7 @@ html, body {
 
 /* Sidebar Section */
 .sidebar {
-  width: 250px;
+  width: 500px;
   background-color: #fff;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -57,6 +57,19 @@ html, body {
 .sidebar li:hover {
   background-color: #f0f8ff;
   cursor: pointer;
+}
+
+.sidebar .map {
+  height: 300px; /* Height for the map */
+  width: 100%;
+  margin-top: 20px; /* Space above the map */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Added shadow for depth */
+  background-color: rgba(255, 0, 0, 0.1); /* Light red for visibility */
+}
+
+.sidebar .map {
+  background-color: rgba(255, 0, 0, 0.1); /* Light red for visibility */
 }
 
 /* Main Content Section */

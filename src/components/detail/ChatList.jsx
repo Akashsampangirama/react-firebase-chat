@@ -1,21 +1,25 @@
 import { useEffect, useState } from "react";
-import "./chatList.css"; // Add your styles
-import AddUser from "../detail/addUser/addUser"; // Ensure this component is available
-import { useUserStore } from "../../lib/userStore"; // Assuming this is your user store
+import "./chatList.css"; 
+import AddUser from "../detail/addUser/addUser"; 
+import { useUserStore } from "../../lib/userStore"; 
 import { doc, getDoc, onSnapshot, updateDoc } from "firebase/firestore";
-import { db } from "../../lib/firebase"; // Ensure the path is correct
-import { useChatStore } from "../../lib/chatStore"; // Assuming this is your chat store
-import OnlineUsers from "../detail/OnlineUsers"; // Import the OnlineUsers component
+import { db } from "../../lib/firebase"; 
+import { useChatStore } from "../../lib/chatStore"; 
+import OnlineUsers from "../detail/OnlineUsers"; 
 
-const ChatList = () => {
+const ChatList = ({ currentUser }) => {
   const [chats, setChats] = useState([]);
   const [addMode, setAddMode] = useState(false);
   const [input, setInput] = useState("");
 
-  const { currentUser } = useUserStore(); // Get the current user from your store
-  const { changeChat } = useChatStore(); // Function to change chat context
+  const { changeChat } = useChatStore(); 
 
   useEffect(() => {
+    if (!currentUser || !currentUser.id) {
+      console.error("Current user is not defined");
+      return;
+    }
+
     const unSub = onSnapshot(doc(db, "userchats", currentUser.id), async (res) => {
       const data = res.data();
       const items = data?.chats || [];
@@ -40,9 +44,14 @@ const ChatList = () => {
     return () => {
       unSub();
     };
-  }, [currentUser.id]);
+  }, [currentUser]); // Ensure this runs whenever currentUser changes
 
   const handleSelect = async (chat) => {
+    if (!currentUser) {
+      console.error("Current user is not defined when selecting chat.");
+      return;
+    }
+
     const userChats = chats.map((item) => {
       const { user, ...rest } = item;
       return rest;
@@ -57,7 +66,7 @@ const ChatList = () => {
         await updateDoc(userChatsRef, { chats: userChats });
         changeChat(chat.chatId, chat.user);
       } catch (err) {
-        console.log(err);
+        console.error("Error updating chat:", err);
       }
     }
   };
@@ -65,6 +74,10 @@ const ChatList = () => {
   const filteredChats = chats.filter((c) =>
     c.user.username.toLowerCase().includes(input.toLowerCase())
   );
+
+  if (!currentUser) {
+    return <div className="loading">Loading chats...</div>; // Show loading state
+  }
 
   return (
     <div className="chatList">
@@ -95,7 +108,7 @@ const ChatList = () => {
         </div>
       ))}
       {addMode && <AddUser />}
-      <OnlineUsers /> {/* Include the OnlineUsers component here */}
+      <OnlineUsers />
     </div>
   );
 };

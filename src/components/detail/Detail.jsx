@@ -1,13 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { db, auth, storage } from "../../lib/firebase";
-import { collection, addDoc, getDocs, query, orderBy, doc, updateDoc, arrayUnion, onSnapshot } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  doc,
+  updateDoc,
+  arrayUnion,
+  onSnapshot,
+} from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import "./detail.css";
 import ChatList from './ChatList';
-import OnlineUsers from './OnlineUsers'
+import MapComponent from './Maps/MapComponent';
 
-const Detail = ({ currentUser }) => {
+const Detail = ({ currentUser, userLocation }) => {
   const [caption, setCaption] = useState("");
   const [files, setFiles] = useState([]);
   const [feed, setFeed] = useState([]);
@@ -17,29 +26,67 @@ const Detail = ({ currentUser }) => {
   const [dislikes, setDislikes] = useState({});
   const [imagePreviews, setImagePreviews] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Loading state
+  const radius = 5000; // Radius in meters
 
   useEffect(() => {
-    const unSub = onSnapshot(query(collection(db, "posts"), orderBy("createdAt", "desc")), (querySnapshot) => {
-      const posts = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setFeed(posts);
+    const unSub = onSnapshot(
+      query(collection(db, "posts"), orderBy("createdAt", "desc")),
+      (querySnapshot) => {
+        const posts = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
 
-      const commentsData = {};
-      const likesData = {};
-      const dislikesData = {};
+        // Filter posts based on user location
+        const filteredPosts = posts.filter((post) => {
+          const postLocation = {
+            latitude: post.latitude,
+            longitude: post.longitude,
+          };
+          return calculateDistance(userLocation, postLocation) <= radius;
+        });
 
-      posts.forEach((post) => {
-        commentsData[post.id] = post.comments || [];
-        likesData[post.id] = post.likes || [];
-        dislikesData[post.id] = post.dislikes || [];
-      });
+        setFeed(filteredPosts);
+        setIsLoading(false); // Set loading to false once feed is set
 
-      setComments(commentsData);
-      setLikes(likesData);
-      setDislikes(dislikesData);
-    });
+        const commentsData = {};
+        const likesData = {};
+        const dislikesData = {};
+
+        filteredPosts.forEach((post) => {
+          commentsData[post.id] = post.comments || [];
+          likesData[post.id] = post.likes || [];
+          dislikesData[post.id] = post.dislikes || [];
+        });
+
+        setComments(commentsData);
+        setLikes(likesData);
+        setDislikes(dislikesData);
+      }
+    );
 
     return () => unSub();
-  }, []);
+  }, [userLocation]);
+
+  const calculateDistance = (loc1, loc2) => {
+    const toRad = (value) => (value * Math.PI) / 180;
+
+    const R = 6371e3; // Radius of Earth in meters
+    const lat1 = toRad(loc1.lat);
+    const lat2 = toRad(loc2.latitude);
+    const deltaLat = toRad(loc2.latitude - loc1.lat);
+    const deltaLng = toRad(loc2.longitude - loc1.lng);
+
+    const a =
+      Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+      Math.cos(lat1) * Math.cos(lat2) *
+      Math.sin(deltaLng / 2) * Math.sin(deltaLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c; // Distance in meters
+  };
 
   const handlePost = async () => {
     if (!caption && files.length === 0) return;
@@ -61,22 +108,33 @@ const Detail = ({ currentUser }) => {
         likes: [],
         dislikes: [],
         imageUrls,
+        longitude: userLocation?.lng || null,
+        latitude: userLocation?.lat || null,
       };
 
       await addDoc(collection(db, "posts"), newPost);
-      setCaption("");
-      setFiles([]);
-      setImagePreviews([]);
+      resetPostForm();
     } catch (error) {
       console.error("Error creating post:", error);
       alert("Failed to create post. Please try again.");
     }
   };
 
-  const handleLogout = () => {
-    signOut(auth).then(() => {
+  const resetPostForm = () => {
+    setCaption("");
+    setFiles([]);
+    setImagePreviews([]);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
       console.log("User logged out");
-    });
+      setMapLoaded(false);
+    } catch (error) {
+      console.error("Error logging out:", error);
+      alert("Failed to log out. Please try again.");
+    }
   };
 
   const handleComment = async (postId) => {
@@ -181,7 +239,8 @@ const Detail = ({ currentUser }) => {
     <div className="detail">
       <div className="sidebar">
         <h2>Online Users</h2>
-        <ChatList />
+        {!isLoading && <ChatList currentUser={currentUser} />}
+        <MapComponent initialLocation={{ lat: 12.9938623, lng: 77.7190971 }} />
       </div>
 
       <div className="main-content">
@@ -258,7 +317,7 @@ const Detail = ({ currentUser }) => {
                         value={commentText[post.id] || ""}
                         onChange={(e) => setCommentText({ ...commentText, [post.id]: e.target.value })}
                       />
-                      <button onClick={() => handleComment(post.id)}>Comment</button>
+                      <button onClick={() => handleComment(post.id)}>Send</button>
                     </div>
                   </div>
                 </div>
@@ -266,14 +325,6 @@ const Detail = ({ currentUser }) => {
             ))}
           </div>
         </div>
-
-        {selectedImage && (
-          <div className="modal" onClick={closeModal}>
-            <div className="modal-content">
-              <img src={selectedImage} alt="Selected" className="modal-image" />
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
